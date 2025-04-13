@@ -5,6 +5,7 @@ import {Registration} from "./components/Registration.js";
 import {Login} from "./components/Login.js";
 import {UsersList} from "./components/UsersList.js";
 import {UserProfile} from "./components/UserProfile.js";
+import {Home} from "./components/Home.js";
 
 import './App.css';
 
@@ -16,6 +17,7 @@ function App() {
     <Route path="/" element={<Registration/>}/>
       <Route path="/login" element={<Login/>}/>
       <Route path="/userslist" element={<UsersList/>}/>
+      <Route path="/home" element={<Home/>}/>
       <Route path="/profile/:id" element={<UserProfile/>}/>
       </Routes>
     </>
@@ -23,3 +25,4 @@ function App() {
 }
 
 export default App;
+//

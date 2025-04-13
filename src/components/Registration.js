@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-
 import {
     Box, Card, CardContent, CardActions, Button,
     Typography, TextField, Modal
@@ -15,6 +14,14 @@ export function Registration() {
         password: '',
         image: ''
     });
+    const [errors, setErrors] = useState({
+        name: '',
+        email: '',
+        password: '',
+    });
+
+    const [imagePreview, setImagePreview] = useState('');
+    const [viewImageModal, setViewImageModal] = useState(false);
 
     const [openModal, setOpenModal] = useState(false);
     const [modalMsg, setModalMsg] = useState('');
@@ -25,22 +32,38 @@ export function Registration() {
             ...prev,
             [name]: value
         }));
+        setErrors(prev => ({
+            ...prev,
+            [name]: ''
+        }));
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const { name, email, password } = formData;
+        const newErrors = { name: '', email: '', password: '' };
+        let hasError = false;
 
-        if (!name || !email || !password) {
-            setModalMsg("Please fill all fields!");
-            setOpenModal(true);
-            return;
+        if (!name) {
+            newErrors.name = "Name is required";
+            hasError = true;
+        }
+        if (!email) {
+            newErrors.email = "Email is required";
+            hasError = true;
+        } else if (!email.endsWith("@gmail.com")) {
+            newErrors.email = "Only Gmail addresses allowed";
+            hasError = true;
+        }
+        if (!password) {
+            newErrors.password = "Password is required";
+            hasError = true;
         }
 
-        if (!email.endsWith("@gmail.com")) {
-            setModalMsg("Please enter a valid Gmail address.");
-            setOpenModal(true);
+        if (hasError) {
+            setErrors(newErrors);
             return;
         }
 
@@ -51,8 +74,12 @@ export function Registration() {
             setTimeout(() => navigate("/userslist"), 1500);
         } catch (err) {
             console.log(err);
-            setModalMsg("Email already registered!");
-            setOpenModal(true);
+            if (err.response?.data?.error?.toLowerCase().includes("email")) {
+                setErrors(prev => ({ ...prev, email: "Email already registered" }));
+            } else {
+                setModalMsg("Registration failed");
+                setOpenModal(true);
+            }
         }
     };
 
@@ -83,29 +110,69 @@ export function Registration() {
                     <Box
                         component="form"
                         onSubmit={handleSubmit}
-                        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', '& .MuiTextField-root': { m: 1, width: '100%' }
+                        sx={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', '& .MuiTextField-root': { m: 1, width: '100%' }
                         }}
                         noValidate
                         autoComplete="off">
-                        <TextField required name="name" label="Name" value={formData.name} onChange={handleChange}
-                        />
-                        <TextField required name="email" label="Email" value={formData.email} onChange={handleChange}
-                        />
-                        <TextField required name="password" label="Password" type="password" value={formData.password} onChange={handleChange}
+                        <TextField
+                            required
+                            name="name"
+                            label="Name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            error={!!errors.name}
+                            helperText={errors.name}
                         />
 
-                        <Button variant="outlined" component="label" sx={{ mt: 2 }}>
-                            Upload Image
-                            <input type="file" hidden accept="image/*" onChange={async (e) => {
-                                    const file = e.target.files[0];
+                        <TextField
+                            required
+                            name="email"
+                            label="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={!!errors.email}
+                            helperText={errors.email}
+                        />
+
+                        <TextField
+                            required
+                            name="password"
+                            label="Password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={!!errors.password}
+                            helperText={errors.password}
+                        />
+
+                        <TextField
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
                                     const base64 = await convertToBase64(file);
                                     setFormData(prev => ({
                                         ...prev,
                                         image: base64
                                     }));
-                                }}
-                            />
-                        </Button>
+                                    setImagePreview(URL.createObjectURL(file));
+                                }
+                            }}
+                            style={{ marginTop: '10px' }}
+                        ></TextField>
+
+                        {imagePreview && (
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                sx={{ mt: 1 }}
+                                onClick={() => setViewImageModal(true)}
+                            >
+                                View
+                            </Button>
+                        )}
 
                         <CardActions sx={{ justifyContent: 'center', mt: 2 }}>
                             <Button type="submit" variant="contained">Register</Button>
@@ -132,9 +199,32 @@ export function Registration() {
                         Message
                     </Typography>
                     <Typography sx={{ mt: 2 }}>{modalMsg}</Typography>
-                    
+
                 </Box>
             </Modal>
+
+            <Modal open={viewImageModal} onClose={() => setViewImageModal(false)}>
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'white',
+                    p: 2,
+                    boxShadow: 24,
+                    maxWidth: 300,
+                    textAlign: 'center'
+                }}>
+                    <Typography variant="h6">Uploaded Image</Typography>
+                    <img
+                        src={imagePreview}
+                        alt="Uploaded"
+                        style={{ width: '100%', marginTop: '10px' }}
+                    />
+                </Box>
+            </Modal>
+
+
         </Box>
     );
 }
