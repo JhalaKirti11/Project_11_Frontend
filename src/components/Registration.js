@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
@@ -21,7 +22,6 @@ export function Registration() {
     });
 
     const [imagePreview, setImagePreview] = useState('');
-    const [viewImageModal, setViewImageModal] = useState(false);
 
     const [openModal, setOpenModal] = useState(false);
     const [modalMsg, setModalMsg] = useState('');
@@ -32,12 +32,17 @@ export function Registration() {
             ...prev,
             [name]: value
         }));
+
         setErrors(prev => ({
             ...prev,
             [name]: ''
         }));
     };
 
+    const handleImageChange = async (e) => {
+        setFormData({ ...formData, image: e.target.files[0] });
+        setImagePreview(URL.createObjectURL(e.target.files[0]));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,7 +59,7 @@ export function Registration() {
             newErrors.email = "Email is required";
             hasError = true;
         } else if (!email.endsWith("@gmail.com")) {
-            newErrors.email = "Only Gmail addresses allowed";
+            newErrors.email = "This is not a valid gmail address";
             hasError = true;
         }
         if (!password) {
@@ -67,29 +72,28 @@ export function Registration() {
             return;
         }
 
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('email', formData.email);
+        data.append('password', formData.password);
+        data.append('image', formData.image);
+
         try {
-            const res = await axios.post('http://localhost:5000/user/register', formData);
+            const res = await axios.post('http://localhost:5000/user/register', data, {
+                'Content-Type': 'multipart/form-data'
+            });
             setModalMsg("Registration successful!");
             setOpenModal(true);
             setTimeout(() => navigate("/userslist"), 1500);
         } catch (err) {
             console.log(err);
             if (err.response?.data?.error?.toLowerCase().includes("email")) {
-                setErrors(prev => ({ ...prev, email: "Email already registered" }));
+                setErrors(prev => ({ ...prev, email: "This gmail is already registered" }));
             } else {
                 setModalMsg("Registration failed");
                 setOpenModal(true);
             }
         }
-    };
-
-    const convertToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (err) => reject(err);
-        });
     };
 
     const visitLogin = () => {
@@ -115,64 +119,35 @@ export function Registration() {
                         }}
                         noValidate
                         autoComplete="off">
-                        <TextField
-                            required
-                            name="name"
-                            label="Name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            error={!!errors.name}
-                            helperText={errors.name}
+                        <TextField required name="name" label="Name" value={formData.name} onChange={handleChange} error={!!errors.name} helperText={errors.name}
                         />
 
-                        <TextField
-                            required
-                            name="email"
-                            label="Email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={!!errors.email}
-                            helperText={errors.email}
+                        <TextField required name="email" label="Email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email}
                         />
 
-                        <TextField
-                            required
-                            name="password"
-                            label="Password"
-                            type="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            error={!!errors.password}
-                            helperText={errors.password}
+                        <TextField required name="password" label="Password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}
                         />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            {imagePreview && (
+                                <img
+                                    src={imagePreview}
+                                    alt="Selected"
+                                    width="200"
+                                    height="200"
+                                    style={{ borderRadius: '8px', objectFit: 'cover' }}
+                                />
+                            )}
 
-                        <TextField
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    const base64 = await convertToBase64(file);
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        image: base64
-                                    }));
-                                    setImagePreview(URL.createObjectURL(file));
-                                }
-                            }}
-                            style={{ marginTop: '10px' }}
-                        ></TextField>
-
-                        {imagePreview && (
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                sx={{ mt: 1 }}
-                                onClick={() => setViewImageModal(true)}
-                            >
-                                View
+                            <Button variant="outlined" component="label">
+                                Choose Image
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={handleImageChange}
+                                />
                             </Button>
-                        )}
+                        </Box>
 
                         <CardActions sx={{ justifyContent: 'center', mt: 2 }}>
                             <Button type="submit" variant="contained">Register</Button>
@@ -199,33 +174,8 @@ export function Registration() {
                         Message
                     </Typography>
                     <Typography sx={{ mt: 2 }}>{modalMsg}</Typography>
-
                 </Box>
             </Modal>
-
-            <Modal open={viewImageModal} onClose={() => setViewImageModal(false)}>
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'white',
-                    p: 2,
-                    boxShadow: 24,
-                    maxWidth: 300,
-                    textAlign: 'center'
-                }}>
-                    <Typography variant="h6">Uploaded Image</Typography>
-                    <img
-                        src={imagePreview}
-                        alt="Uploaded"
-                        style={{ width: '100%', marginTop: '10px' }}
-                    />
-                </Box>
-            </Modal>
-
-
         </Box>
     );
 }
-

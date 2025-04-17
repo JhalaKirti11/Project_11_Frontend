@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
@@ -17,8 +16,8 @@ import Button from '@mui/material/Button';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 
-export function UsersList() {
-    const [userData, setUserData] = useState([]);
+export function ProductList() {
+    const [productData, setproductData] = useState([]);
     const [selecteId, setSelectedId] = useState('');
     const navigate = useNavigate();
     const [modalMsg, setModalMsg] = useState('');
@@ -31,37 +30,35 @@ export function UsersList() {
         if (!token) {
             navigate('/login');
         } else {
-            userlist(token);
+            productlist(token);
         }
     }, []);
 
-    const userlist = async (token) => {
+    const productlist = async (token) => {
         try {
-            console.log('User Data:', userData);
-
-
-            const response = await axios.get("http://localhost:5000/user/allUsers", {
+            console.log('product Data:', productData);
+            const response = await axios.get("http://localhost:5000/product/viewAllProduct", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            console.log("User Data:", response.data.users);
-            setUserData(response.data.users);
+            console.log("product Data:", response.data.products);
+            setproductData(response.data.products);
 
         } catch (error) {
             console.log("Error during fetching data:", error);
-            console.log("Can not fetch the user data");
+            console.log("Can not fetch the product data");
         }
     };
 
-    function deactivateProfile(id) {
+    function deactivateProduct(id) {
         setSelectedId(id);
         setModalMsg("Are you sure you want to delete it!");
         setOpenModal(true);
     }
 
-    const deleteProfile = async (id) => {
+    const deleteProduct = async (id) => {
         const token = sessionStorage.getItem("token");
         console.log("Token:", token);
 
@@ -69,77 +66,77 @@ export function UsersList() {
             navigate('/login');
         }
         try {
-            console.log("id ::::: " + id);
-            console.log("token 000 : " + token)
-            const response = await axios.delete(`http://localhost:5000/user/delete/${id}`, { state: false }, {
+            console.log("id: " + id);
+            console.log("token: " + token)
+            const response = await axios.put(`http://localhost:5000/product/deleteProduct/${id}`, { state: false }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log("user deactivated...");
+            console.log("product deactivated...");
             setOpenModal(false);
-            userlist(token);
+            productlist(token);
         } catch (error) {
-            console.log("Error during deactivating user:", error);
-            console.log("Can not deactivating the user");
+            console.log("Error during deactivating product:", error);
+            console.log("Can not deactivating the product");
         }
     }
 
-    function editProfile(id, user) {
-        sessionStorage.setItem("user", JSON.stringify(user));
-        navigate(`/update/${id}`);
-    }
-
-    function visitProfile(id) {
-        navigate(`/profile/${id}`);
+    function editProduct(id, product) {
+        navigate(`/updateProduct/${id}`);
     }
 
     return (
         <>
-            <Box>
-                <div align='center'>Want to see the Products
-                    <Button variant="contained" onClick={() => navigate("/productlist")}>Click here</Button></div>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-
-                <Card sx={{ maxWidth: 650 }}>
-                    <Typography align='center' fontWeight='700' variant='h6' sx={{ textDecoration: 'underline' }}>User List</Typography>
+            <Box sx={{ justifyContent: 'center', mt: 8 }}>
+                <div align='right' dispaly='flex'>
+                    <Button variant="contained" onClick={() => navigate("/addProduct")}>Add Product</Button>
+                    <Button variant="contained" onClick={() => navigate("/addCategory")} sx={{ marginLeft: 2 }}>Category</Button>
+                </div>
+                <Card>
+                    <Typography align='center' fontWeight='700' variant='h6' sx={{ textDecoration: 'underline' }}>Product List</Typography>
                     <TableContainer component={Paper}>
                         <Table sx={{ minWidth: 450, marginTop: '30px' }} aria-label="simple table">
                             <TableHead>
                                 <TableRow >
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Name</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="center">Email</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Description</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Category</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">size</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Quantity</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Price</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Image</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="center">Profile</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="center">Update</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Edit</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Delete</TableCell>
+
                                 </TableRow>
                             </TableHead>
 
                             <TableBody>
-                                {userData.map((user) => (
+                                {productData.map((product) => (
                                     <TableRow
-                                        key={user.name}
+                                        key={product.name}
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                     >
                                         <TableCell component="th" align="center" scope="row">
-                                            {user.name}
+                                            {product.name ||'--'}
                                         </TableCell>
-                                        <TableCell align="center">{user.email}</TableCell>
+                                        <TableCell align="center">{product.description ||'--'}</TableCell>
+                                        <TableCell align="center">{product.category.name ||'--'}</TableCell>
+                                        <TableCell align="center">{product.size ||'--'}</TableCell>
+                                        <TableCell align="center">{product.quantity ||'--'}</TableCell>
+                                        <TableCell align="center">{product.price ||'--'}</TableCell>
+
                                         <TableCell align="center">
-                                            <img src={`http://localhost:5000/${user.image}`} alt='user_profile' style={{ width: '50px', height: '50px' }} />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Button onClick={() => visitProfile(user._id)}>View</Button>
+                                        <img src={`http://localhost:5000/${product.image}` ||'--'} alt="product" style={{ width: '50px', height: '50px' }} />
                                         </TableCell>
                                         <TableCell component="th" align="center" scope="row" sx={{ color: '#504e4ec9' }} >
-                                            <Button variant="text" size="small" sx={{ mt: 1, color: '#504e4ec9' }} onClick={() => editProfile(user._id, user)}>
+                                            <Button variant="text" size="small" sx={{ mt: 1, color: '#504e4ec9' }} onClick={() => editProduct(product._id, product)}>
                                                 <EditIcon />
                                             </Button>
                                         </TableCell>
                                         <TableCell component="th" align="center" scope="row" >
-                                            <Button variant="text" size="small" sx={{ mt: 1, color: '#504e4ec9' }} onClick={() => deactivateProfile(user._id)}>
+                                            <Button variant="text" size="small" sx={{ mt: 1, color: '#504e4ec9' }} onClick={() => deactivateProduct(product._id)}>
                                                 <DeleteOutlinedIcon />
                                             </Button>
                                         </TableCell>
@@ -166,7 +163,7 @@ export function UsersList() {
                             Message
                         </Typography>
                         <Typography sx={{ mt: 2 }}>{modalMsg}</Typography>
-                        <Button variant="contained" size="small" sx={{ mt: 1, backgroundColor: 'green' }} onClick={() => deleteProfile(selecteId)}>
+                        <Button variant="contained" size="small" sx={{ mt: 1, backgroundColor: 'green' }} onClick={() => deleteProduct(selecteId)}>
                             Delete
                         </Button>
                     </Box>
