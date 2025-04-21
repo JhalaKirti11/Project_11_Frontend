@@ -22,6 +22,9 @@ import EditIcon from '@mui/icons-material/Edit';
 export function ProductList() {
     const [productData, setproductData] = useState([]);
     const [selecteId, setSelectedId] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -41,13 +44,56 @@ export function ProductList() {
     useEffect(() => {
         productlist();
     }, []);
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        const filtered = productData.filter((product) =>
-            product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        const fetchCategories = async () => {
+            try {
+                // const res = await axios.get('http://localhost:5000/product/viewAllCategory', {
+                //     headers: {
+                //         Authorization: `Bearer ${token}`
+                //     }
+                // });
+                  const res = await axios.get("http://localhost:5000/product/viewCategory", {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            });
+                setCategories(res.data.category);
+            } catch (err) {
+                console.error('Failed to fetch categories:', err);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    // useEffect(() => {
+    //     const filtered = productData.filter((product) =>
+    //         product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    //     );
+    //     setFilteredProducts(filtered);
+    // }, [searchQuery, productData]);
+    useEffect(() => {
+        let filtered = productData;
+
+        if (searchQuery) {
+            filtered = filtered.filter(product =>
+                product.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        if (selectedCategory) {
+            filtered = filtered.filter(product => product.category._id === selectedCategory);
+        }
+
+        if (minPrice !== '' && maxPrice !== '') {
+            filtered = filtered.filter(product => product.price >= minPrice && product.price <= maxPrice);
+        }
+
         setFilteredProducts(filtered);
-    }, [searchQuery, productData]);
+    }, [searchQuery, productData, selectedCategory, minPrice, maxPrice]);
+
 
 
     const productlist = async () => {
@@ -202,13 +248,50 @@ export function ProductList() {
                         transform: 'translate(-50%, -50%)',
                         width: 350,
                         bgcolor: 'background.paper',
-                        borderRadius: 0,
                         boxShadow: 12,
-                        p: 2
+                        p: 3
                     }}>
-                        <Typography variant={'h6'}>By Category</Typography>
+                        <Typography variant="h6" gutterBottom>Filter Products</Typography>
+
+                        {/* Category Dropdown */}
+                        <TextField
+                            select
+                            label="Category"
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            fullWidth
+                            SelectProps={{ native: true }}
+                            sx={{ mb: 2 }}
+                        >
+                            <option value="">All</option>
+                            {categories.map(cat => (
+                                <option key={cat._id} value={cat._id}>{cat.name}</option>
+                            ))}
+                        </TextField>
+
+                        {/* Price Range */}
+                        <TextField
+                            label="Min Price"
+                            type="number"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            fullWidth
+                            sx={{ mb: 2 }}
+                        />
+                        <TextField
+                            label="Max Price"
+                            type="number"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            fullWidth
+                        />
+
+                        <Button variant="contained" sx={{ mt: 2 }} onClick={() => setOpenModal2(false)}>
+                            Apply Filters
+                        </Button>
                     </Card>
                 </Modal>
+
             </Box>
         </>
     )
