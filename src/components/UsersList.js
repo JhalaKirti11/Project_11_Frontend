@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from "axios";
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -20,26 +21,27 @@ import EditIcon from '@mui/icons-material/Edit';
 export function UsersList() {
     const [userData, setUserData] = useState([]);
     const [selecteId, setSelectedId] = useState('');
-    const navigate = useNavigate();
     const [modalMsg, setModalMsg] = useState('');
     const [openModal, setOpenModal] = useState(false);
+    const [openModal2, setOpenModal2] = useState(false);
+    const navigate = useNavigate();
+
+    const token = useSelector((state) => state.user.token)
+    const _id = useSelector((state) => state.user._id);
 
     useEffect(() => {
-        const token = sessionStorage.getItem("token");
         console.log("Token:", token);
 
         if (!token) {
             navigate('/login');
-        } else {
-            userlist(token);
         }
+        userlist();
+
     }, []);
 
-    const userlist = async (token) => {
+    const userlist = async () => {
         try {
             console.log('User Data:', userData);
-
-
             const response = await axios.get("http://localhost:5000/user/allUsers", {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -62,16 +64,14 @@ export function UsersList() {
     }
 
     const deleteProfile = async (id) => {
-        const token = sessionStorage.getItem("token");
-        console.log("Token:", token);
 
         if (!token) {
             navigate('/login');
         }
         try {
-            console.log("id ::::: " + id);
-            console.log("token 000 : " + token)
-            const response = await axios.delete(`http://localhost:5000/user/delete/${id}`, { state: false }, {
+            console.log("id " + id);
+            console.log("token : " + token)
+            const response = await axios.put(`http://localhost:5000/user/delete/${id}`, { state: false }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -87,7 +87,13 @@ export function UsersList() {
 
     function editProfile(id, user) {
         sessionStorage.setItem("user", JSON.stringify(user));
-        navigate(`/update/${id}`);
+
+        if (_id !== id) {
+            setModalMsg("You are not the admin of this profile!");
+            setOpenModal2(true);
+            setTimeout(() => navigate("/userslist"), 200000);
+        } else
+            navigate(`/update/${id}`);
     }
 
     function visitProfile(id) {
@@ -98,11 +104,11 @@ export function UsersList() {
         <>
             <Box>
                 <div align='center'>Want to see the Products
-                    <Button variant="contained" onClick={() => navigate("/productlist")}>Click here</Button></div>
+                    <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/productlist")}>Click here</Button></div>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
 
-                <Card sx={{ maxWidth: 650 }}>
+                <Card sx={{ maxWidth: 750 }}>
                     <Typography align='center' fontWeight='700' variant='h6' sx={{ textDecoration: 'underline' }}>User List</Typography>
                     <TableContainer component={Paper}>
                         <Table sx={{ minWidth: 450, marginTop: '30px' }} aria-label="simple table">
@@ -169,6 +175,25 @@ export function UsersList() {
                         <Button variant="contained" size="small" sx={{ mt: 1, backgroundColor: 'green' }} onClick={() => deleteProfile(selecteId)}>
                             Delete
                         </Button>
+                    </Box>
+                </Modal>
+                <Modal open={openModal2} onClose={() => setOpenModal2(false)}>
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 300,
+                        bgcolor: 'background.paper',
+                        borderRadius: 0,
+                        boxShadow: 12,
+                        p: 2,
+                        textAlign: 'center'
+                    }}>
+                        <Typography variant="h6" fontWeight={800}>
+                            Message
+                        </Typography>
+                        <Typography sx={{ mt: 2 }}>{modalMsg}</Typography>
                     </Box>
                 </Modal>
             </Box>

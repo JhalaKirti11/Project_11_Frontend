@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom"
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 import {
     Box, Card, CardContent, Typography, TextField, Button, Modal, CardActions,
     TableHead, TableCell, TableRow, TableBody, Table, TableContainer, Paper
@@ -26,7 +27,7 @@ export function AddCategory() {
         setName2(e.target.value);
         setError('');
     };
-    const token = sessionStorage.getItem("token");
+        const token = useSelector((state) => state.user.token);
     console.log("Token:", token);
 
     if (!token) {
@@ -281,8 +282,6 @@ export function AddCategory() {
                     <Typography variant="h6" fontWeight={800}>
                         Update
                     </Typography>
-                    {/* <TextField required name="name" label="Category Name" value={name} onChange={handleChange} error={!!error} helperText={error}
-                    /> */}
                     <TextField
                         name="name2"
                         value={name2}

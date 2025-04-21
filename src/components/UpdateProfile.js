@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Button, Card, Grid, TextField, Typography, Modal } from "@mui/material";
-import EditSquareIcon from "@mui/icons-material/EditSquare";
+import { setUser } from "../redux/userSlice";
 
 export const UpdateProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [userData, setUserData] = useState({
         name: "",
         email: "",
+        password: "",
         image: "",
     });
     const [errors, setErrors] = useState({ email: '', name: '' });
-
     const [selectedImage, setSelectedImage] = useState(null);
     const [openModal, setOpenModal] = useState(false);
     const [modalMsg, setModalMsg] = useState('');
 
+    const token = useSelector((state) => state.user.token);
     useEffect(() => {
+        if (!token) {
+            navigate('/login');
+        }
+        console.log("token " + token);
         fetchUserData();
     }, []);
 
     const fetchUserData = async () => {
         try {
-            const token = sessionStorage.getItem("token");
             console.log("token fetching the data : " + token)
             const response = await axios.get(`http://localhost:5000/user/profile/${id}`, {
                 headers: {
@@ -57,21 +63,20 @@ export const UpdateProfile = () => {
         const file = e.target.files[0];
         setUserData({ ...userData, image: file });
         setSelectedImage(file);
-
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
         try {
-            const token = sessionStorage.getItem("token");
-            const { email, name } = userData;
+            const { name, email } = userData;
             let hasError = false;
             const newErrors = { email: '', name: '' };
+    
             if (!name) {
-                newErrors.name = "name is required";
+                newErrors.name = "Name is required";
                 hasError = true;
             }
-
+    
             if (!email) {
                 newErrors.email = "Email is required";
                 hasError = true;
@@ -79,38 +84,52 @@ export const UpdateProfile = () => {
                 newErrors.email = "This is not a valid gmail address";
                 hasError = true;
             }
-
+    
             if (hasError) {
                 setErrors(newErrors);
                 return;
             }
+
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("email", email);
+            formData.append('token', token);
+            if (selectedImage) {
+                formData.append("image", selectedImage);
+            }
+    
             const response = await axios.put(
                 `http://localhost:5000/user/update/${id}`,
-                {
-                    name: userData.name,
-                    email: userData.email,
-                    image: userData.image,
-                },
+                formData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
                     },
                 }
             );
-
+    
             if (response.data.success) {
-                setModalMsg("Updated successful!");
+                const userPayload = {
+                    _id: response.data.user._id,
+                    name: response.data.user.name,
+                    email: response.data.user.email,
+                    password: response.data.user.password,
+                    image: response.data.user.image,
+                    token: response.data.token,
+                };
+    
+                dispatch(setUser(userPayload));
+                setModalMsg("Updated successfully!");
                 setOpenModal(true);
                 setTimeout(() => navigate("/userslist"), 1500);
             }
         } catch (error) {
             console.error("Error updating profile:", error);
-            setModalMsg("Updates failed");
+            setModalMsg("Update failed");
             setOpenModal(true);
         }
     };
-
+    
     return (
         <Box sx={{ justifyContent: "center", display: "flex", mt: 8 }}>
             <Card sx={{ p: 4, width: 400 }}>
@@ -137,6 +156,7 @@ export const UpdateProfile = () => {
                                         cursor: "pointer"
                                     }}
                                 />
+
                             </label>
                             <input
                                 id='image'

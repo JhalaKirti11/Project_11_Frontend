@@ -20,12 +20,9 @@ export function Registration() {
         email: '',
         password: '',
     });
-
     const [imagePreview, setImagePreview] = useState('');
-
     const [openModal, setOpenModal] = useState(false);
     const [modalMsg, setModalMsg] = useState('');
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -128,7 +125,7 @@ export function Registration() {
                         <TextField required name="password" label="Password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}
                         />
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                            {imagePreview && (
+                            {imagePreview ? (
                                 <img
                                     src={imagePreview}
                                     alt="Selected"
@@ -136,17 +133,18 @@ export function Registration() {
                                     height="200"
                                     style={{ borderRadius: '8px', objectFit: 'cover' }}
                                 />
-                            )}
+                            ) :(
 
-                            <Button variant="outlined" component="label">
-                                Choose Image
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    hidden
-                                    onChange={handleImageChange}
-                                />
-                            </Button>
+                                <Button variant="outlined" component="label">
+                                    Choose Image
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={handleImageChange}
+                                    />
+                                </Button>
+                            )}
                         </Box>
 
                         <CardActions sx={{ justifyContent: 'center', mt: 2 }}>
@@ -174,6 +172,7 @@ export function Registration() {
                         Message
                     </Typography>
                     <Typography sx={{ mt: 2 }}>{modalMsg}</Typography>
+
                 </Box>
             </Modal>
         </Box>

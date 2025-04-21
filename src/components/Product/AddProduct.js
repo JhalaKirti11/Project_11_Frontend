@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { useSelector } from 'react-redux';
 import {
-    Box, Card, CardActions, CardContent,
+    Box, Card, CardActions, CardContent, Autocomplete,
     Button, Typography, TextField, Modal
 } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import { MenuItem } from '@mui/material';
 
 export function AddProduct() {
     const [formData, setFormData] = useState({});
@@ -20,6 +20,12 @@ export function AddProduct() {
 
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
+    const token = useSelector((state) => state.user.token);
+    console.log("Token:", token);
+    if (!token) {
+        navigate('/login');
+    }
+
 
     useEffect(() => {
         getCategories()
@@ -52,12 +58,6 @@ export function AddProduct() {
 
     const getCategories = async () => {
         try {
-            const token = sessionStorage.getItem("token");
-            console.log("Token:", token);
-            if (!token) {
-                navigate('/login');
-            }
-
             const response = await axios.get("http://localhost:5000/product/viewCategory", {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -116,12 +116,6 @@ export function AddProduct() {
         }
 
         try {
-            const token = sessionStorage.getItem("token");
-            console.log("Token:", token);
-            if (!token) {
-                navigate('/login');
-            }
-
             await axios.post("http://localhost:5000/product/createProduct", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -133,7 +127,7 @@ export function AddProduct() {
             setOpenModal(true);
 
             setFormData({});
-           
+
             setTimeout(() => {
                 setOpenModal(false);
                 setImage('');
@@ -149,7 +143,6 @@ export function AddProduct() {
 
     const handleImageChange = (e) => {
         setFormData({ ...formData, image: e.target.files[0] });
-        setImage(URL.createObjectURL(e.target.files[0]));
     };
 
     return (
@@ -176,22 +169,31 @@ export function AddProduct() {
                                     />
                                 </Grid>
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
-                                    <TextField
-                                        select
-                                        required
-                                        name="category"
-                                        label="Category"
-                                        value={formData.category || ''}
-                                        onChange={handleChange}
-                                        error={!!errors.category}
-                                        helperText={errors.category}
-                                    >
-                                        {categories.map((category) => (
-                                            <MenuItem key={category.name} value={category.name}>
-                                                {category.name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                    <Autocomplete
+                                        options={categories}
+                                        getOptionLabel={(option) => option.name}
+                                        value={categories.find((cat) => cat.name === formData.category) || null}
+                                        // onChange={handleChange}
+                                        onChange={(event, cat2) => {
+                                            handleChange({
+                                                target: {
+                                                    name: 'category',
+                                                    value: cat2 ? cat2.name : ''
+                                                }
+                                            })
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Category"
+                                                name="category"
+                                                required
+                                                error={!!errors.category}
+                                                helperText={errors.category}
+                                            />
+                                        )}
+                                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                                    />
                                 </Grid>
 
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -208,7 +210,7 @@ export function AddProduct() {
                                 </Grid>
 
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
-                                    <Button variant="outlined" component="label">
+                                    <Button variant="outlined" component="label" sx={{ justifyContent: 'center', mx: 2, mt: 2 }}>
                                         {image ? (
                                             <img src={image} alt="Preview" width="200" height="200" style={{ objectFit: 'cover' }} />
                                         ) : (
@@ -223,10 +225,12 @@ export function AddProduct() {
                                         />
                                     </Button>
                                 </Grid>
+                                <Grid size={{ xs: 2, sm: 4, md: 4 }}></Grid>
+                                <Grid size={{ xs: 2, sm: 4, md: 4 }}>
+                                    <CardActions sx={{ justifyContent: 'end' }}>
+                                        <Button type="submit" variant="contained">Submit</Button>
+                                    </CardActions></Grid>
                             </Grid>
-                            <CardActions sx={{ justifyContent: 'center', mt: 2 }}>
-                                <Button type="submit" variant="outlined">Submit</Button>
-                            </CardActions>
                         </Box>
                     </CardContent>
                 </Card>

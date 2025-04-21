@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from "axios";
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import Modal from '@mui/material/Modal';
+import Grid from '@mui/material/Grid';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -12,6 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
@@ -19,22 +22,35 @@ import EditIcon from '@mui/icons-material/Edit';
 export function ProductList() {
     const [productData, setproductData] = useState([]);
     const [selecteId, setSelectedId] = useState('');
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredProducts, setFilteredProducts] = useState([]);
+
     const navigate = useNavigate();
     const [modalMsg, setModalMsg] = useState('');
     const [openModal, setOpenModal] = useState(false);
+    const [openModal2, setOpenModal2] = useState(false);
+
+
+    const token = useSelector((state) => state.user.token);
+    console.log("Token:", token);
+    if (!token) {
+        navigate('/login');
+    }
 
     useEffect(() => {
-        const token = sessionStorage.getItem("token");
-        console.log("Token:", token);
-
-        if (!token) {
-            navigate('/login');
-        } else {
-            productlist(token);
-        }
+        productlist();
     }, []);
 
-    const productlist = async (token) => {
+    useEffect(() => {
+        const filtered = productData.filter((product) =>
+            product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+    }, [searchQuery, productData]);
+
+
+    const productlist = async () => {
         try {
             console.log('product Data:', productData);
             const response = await axios.get("http://localhost:5000/product/viewAllProduct", {
@@ -42,7 +58,6 @@ export function ProductList() {
                     Authorization: `Bearer ${token}`
                 }
             });
-
             console.log("product Data:", response.data.products);
             setproductData(response.data.products);
 
@@ -59,12 +74,6 @@ export function ProductList() {
     }
 
     const deleteProduct = async (id) => {
-        const token = sessionStorage.getItem("token");
-        console.log("Token:", token);
-
-        if (!token) {
-            navigate('/login');
-        }
         try {
             console.log("id: " + id);
             console.log("token: " + token)
@@ -93,6 +102,25 @@ export function ProductList() {
                     <Button variant="contained" onClick={() => navigate("/addProduct")}>Add Product</Button>
                     <Button variant="contained" onClick={() => navigate("/addCategory")} sx={{ marginLeft: 2 }}>Category</Button>
                 </div>
+                <Grid container spacing={2} sx={{ display: 'flex', flexGrow: 1 }}>
+                    <Grid size={7} sx={{ justifyContent: 'start' }}>
+                        <Box sx={{ display: 'flex', mx: 3, my: 2 }}>
+                            <Typography variant="h6" sx={{ mx: 3, mt: 2 }}>Search</Typography>
+                            <TextField
+                                type="text"
+                                placeholder="Search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                style={{
+                                    width: '300px'
+                                }}
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid size={4} align='end' sx={{ mt: 3, mx: 1 }}>
+                        <Button variant="contained" onClick={() => setOpenModal2(true)}>Filter</Button>
+                    </Grid>
+                </Grid>
                 <Card>
                     <Typography align='center' fontWeight='700' variant='h6' sx={{ textDecoration: 'underline' }}>Product List</Typography>
                     <TableContainer component={Paper}>
@@ -108,27 +136,25 @@ export function ProductList() {
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Image</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Edit</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Delete</TableCell>
-
                                 </TableRow>
                             </TableHead>
-
                             <TableBody>
-                                {productData.map((product) => (
+                                {filteredProducts.map((product) => (
                                     <TableRow
                                         key={product.name}
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                     >
                                         <TableCell component="th" align="center" scope="row">
-                                            {product.name ||'--'}
+                                            {product.name || '--'}
                                         </TableCell>
-                                        <TableCell align="center">{product.description ||'--'}</TableCell>
-                                        <TableCell align="center">{product.category.name ||'--'}</TableCell>
-                                        <TableCell align="center">{product.size ||'--'}</TableCell>
-                                        <TableCell align="center">{product.quantity ||'--'}</TableCell>
-                                        <TableCell align="center">{product.price ||'--'}</TableCell>
+                                        <TableCell align="center">{product.description || '--'}</TableCell>
+                                        <TableCell align="center">{product.category.name || '--'}</TableCell>
+                                        <TableCell align="center">{product.size || '--'}</TableCell>
+                                        <TableCell align="center">{product.quantity || '--'}</TableCell>
+                                        <TableCell align="center">{product.price || '--'}</TableCell>
 
                                         <TableCell align="center">
-                                        <img src={`http://localhost:5000/${product.image}` ||'--'} alt="product" style={{ width: '50px', height: '50px' }} />
+                                            <img src={`http://localhost:5000/${product.image}` || '--'} alt="product" style={{ width: '50px', height: '50px' }} />
                                         </TableCell>
                                         <TableCell component="th" align="center" scope="row" sx={{ color: '#504e4ec9' }} >
                                             <Button variant="text" size="small" sx={{ mt: 1, color: '#504e4ec9' }} onClick={() => editProduct(product._id, product)}>
@@ -167,6 +193,21 @@ export function ProductList() {
                             Delete
                         </Button>
                     </Box>
+                </Modal>
+                <Modal open={openModal2} onClose={() => setOpenModal2(false)}>
+                    <Card sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '80%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 350,
+                        bgcolor: 'background.paper',
+                        borderRadius: 0,
+                        boxShadow: 12,
+                        p: 2
+                    }}>
+                        <Typography variant={'h6'}>By Category</Typography>
+                    </Card>
                 </Modal>
             </Box>
         </>

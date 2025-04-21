@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 
 import {Registration} from "./components/Registration.js";
 import {Login} from "./components/Login.js";
-import {UsersList} from "./components/UsersList.js";
+import {UsersList} from "./components/usersList.js";
 import {UserProfile} from "./components/UserProfile.js";
 import {Home} from "./components/Home.js";
 import {UpdateProfile} from "./components/UpdateProfile.js";

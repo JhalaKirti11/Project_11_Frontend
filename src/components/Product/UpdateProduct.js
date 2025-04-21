@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from "axios";
 import {
-    Box, Card, CardActions, CardContent,
+    Box, Card, CardActions, CardContent, Autocomplete,
     Button, Typography, TextField, Modal
 } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import { MenuItem } from '@mui/material';
-
 
 export function UpdateProduct() {
 
@@ -20,11 +19,13 @@ export function UpdateProduct() {
     const [modalMsg, setModalMsg] = useState('');
 
     const navigate = useNavigate();
-
+    const token = useSelector((state) => state.user.token);
+    console.log("Token:", token);
+    if (!token) {
+        navigate('/login');
+    }
     const [categories, setCategories] = useState([]);
     const { id } = useParams();
-
-
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: '#fff',
         ...theme.typography.body2,
@@ -43,8 +44,6 @@ export function UpdateProduct() {
 
     const fetchProductData = async () => {
         try {
-            const token = sessionStorage.getItem("token");
-            console.log("token fetching the data : " + token)
             const response = await axios.get(`http://localhost:5000/product/viewProduct/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -52,10 +51,9 @@ export function UpdateProduct() {
             });
             if (response) {
                 console.log("res : " + response.data.product.category.name);
-                // setFormData(response.data.product);
                 setFormData({
                     ...response.data.product,
-                    category: response.data.product.category.name // flatten it
+                    category: response.data.product.category.name
                 });
 
             }
@@ -78,12 +76,6 @@ export function UpdateProduct() {
 
     const getCategories = async () => {
         try {
-            const token = sessionStorage.getItem("token");
-            console.log("Token:", token);
-            if (!token) {
-                navigate('/login');
-            }
-
             const response = await axios.get("http://localhost:5000/product/viewCategory", {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -106,7 +98,6 @@ export function UpdateProduct() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const { name, description, category, quantity, price } = formData;
         const newErrors = {};
         let hasError = false;
@@ -138,12 +129,15 @@ export function UpdateProduct() {
         }
 
         try {
-            const token = sessionStorage.getItem("token");
-            console.log("Token:", token);
-            if (!token) {
-                navigate('/login');
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("description", description );
+            formData.append('category', category );
+            formData.append('quantity', quantity);
+            formData.append("price", price);
+            if (image) {
+                formData.append("image", image);
             }
-
             await axios.put(`http://localhost:5000/product/updateProduct/${id}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -153,12 +147,7 @@ export function UpdateProduct() {
 
             setModalMsg("Product Updated successfully!");
             setOpenModal(true);
-
-            setFormData({});
-
             setTimeout(() => {
-                setOpenModal(false);
-                setImage('');
                 navigate("/productlist");
             }, 1500);
 
@@ -199,24 +188,31 @@ export function UpdateProduct() {
                                     />
                                 </Grid>
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
-                                    <TextField
-                                        select
-                                        required
-                                        name="category"
-                                        label="Category"
-                                        value={formData.category || ''}
-                                        onChange={handleChange}
-                                        error={!!errors.category}
-                                        helperText={errors.category}
-                                    >
-                                        {categories.map((category) => (
-                                            <MenuItem key={category.name} value={category.name}>
-                                                {category.name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                    <Autocomplete
+                                        options={categories}
+                                        getOptionLabel={(option) => option.name}
+                                        value={categories.find((cat) => cat.name === formData.category) || null}
+                                        onChange={(event, newValue) => {
+                                            handleChange({
+                                                target: {
+                                                    name: 'category',
+                                                    value: newValue ? newValue.name : '',
+                                                },
+                                            });
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Category"
+                                                name="category"
+                                                required
+                                                error={!!errors.category}
+                                                helperText={errors.category}
+                                            />
+                                        )}
+                                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                                    />
                                 </Grid>
-
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
                                     <TextField name="size" label='Size' value={formData.size || ""} onChange={handleChange}
                                     />
@@ -229,7 +225,6 @@ export function UpdateProduct() {
                                     <TextField required name="price" label="Price" type="price" value={formData.price || ""} onChange={handleChange} error={!!errors.price} helperText={errors.price}
                                     />
                                 </Grid>
-
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
                                     <label htmlFor="image">
                                         <img
@@ -238,7 +233,7 @@ export function UpdateProduct() {
                                                     ? URL.createObjectURL(image)
                                                     : `http://localhost:5000/${formData.image}`
                                             }
-                                            alt="User"
+                                            alt="Product"
                                             style={{
                                                 height: "100px",
                                                 width: "100px",
@@ -248,6 +243,7 @@ export function UpdateProduct() {
                                         />
                                     </label>
                                     <input
+                                    required
                                         id='image'
                                         type="file"
                                         accept="image/*"
