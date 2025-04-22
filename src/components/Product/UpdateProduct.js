@@ -98,7 +98,7 @@ export function UpdateProduct() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { name, description, category, quantity, price } = formData;
+        const { name, description, category, quantity, price, size } = formData;
         const newErrors = {};
         let hasError = false;
 
@@ -135,6 +135,9 @@ export function UpdateProduct() {
             formData.append('category', category );
             formData.append('quantity', quantity);
             formData.append("price", price);
+            if(size){
+                formData.append("size", size);
+            }
             if (image) {
                 formData.append("image", image);
             }
@@ -214,7 +217,7 @@ export function UpdateProduct() {
                                     />
                                 </Grid>
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>
-                                    <TextField name="size" label='Size' value={formData.size || ""} onChange={handleChange}
+                                    <TextField name="size" label='Size' type='size' value={formData.size || ""} onChange={handleChange}
                                     />
                                 </Grid>
                                 <Grid size={{ xs: 2, sm: 4, md: 4 }}>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -13,28 +14,45 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Card from '@mui/material/Card'
+import Slider from '@mui/material/Slider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
+import { MenuItem, Select, Divider, Radio, RadioGroup, FormLabel } from '@mui/material'
 
 export function ProductList() {
     const [productData, setproductData] = useState([]);
     const [selecteId, setSelectedId] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
+
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedPrice, setSelectedPrice] = useState('');
+    const [selectedQuantity, setSelectedQuantity] = useState('');
+    // const [selectedMaxQuantity, setSelectedMaxQuantity] = useState('');
+
+    const [selectedSize, setSelectedSize] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
 
-    const navigate = useNavigate();
     const [modalMsg, setModalMsg] = useState('');
     const [openModal, setOpenModal] = useState(false);
     const [openModal2, setOpenModal2] = useState(false);
+    const marks = [
+        {
+            value: 100,
+            label: '100',
+        },
+        {
+            value: 900000,
+            label: '900000',
+        }
+    ];
 
-
+    const navigate = useNavigate();
     const token = useSelector((state) => state.user.token);
     console.log("Token:", token);
     if (!token) {
@@ -49,17 +67,12 @@ export function ProductList() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                // const res = await axios.get('http://localhost:5000/product/viewAllCategory', {
-                //     headers: {
-                //         Authorization: `Bearer ${token}`
-                //     }
-                // });
-                  const res = await axios.get("http://localhost:5000/product/viewCategory", {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            });
+                const res = await axios.get("http://localhost:5000/product/viewCategory", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
                 setCategories(res.data.category);
             } catch (err) {
                 console.error('Failed to fetch categories:', err);
@@ -74,6 +87,7 @@ export function ProductList() {
     //     );
     //     setFilteredProducts(filtered);
     // }, [searchQuery, productData]);
+
     useEffect(() => {
         let filtered = productData;
 
@@ -83,18 +97,51 @@ export function ProductList() {
             );
         }
 
-        if (selectedCategory) {
-            filtered = filtered.filter(product => product.category._id === selectedCategory);
+        if (selectedCategories.length > 0) {
+            filtered = filtered.filter(product => selectedCategories.includes(product.category._id));
         }
 
-        if (minPrice !== '' && maxPrice !== '') {
-            filtered = filtered.filter(product => product.price >= minPrice && product.price <= maxPrice);
+        if (selectedPrice) {
+            filtered = filtered.filter(product => product.price <= selectedPrice);
+        }
+        if (selectedQuantity) {
+            console.log('quantity : ' + selectedQuantity)
+            const [min, max] = selectedQuantity === '90-max' ? [90, Infinity] : selectedQuantity.split('-').map(Number);
+            console.log("min : " + min + ' max : ' + max)
+            filtered = filtered.filter(product => product.quantity >= min && product.quantity < max);
+        }
+
+        if (selectedSize) {
+            filtered = filtered.filter(product => product.size === selectedSize);
         }
 
         setFilteredProducts(filtered);
-    }, [searchQuery, productData, selectedCategory, minPrice, maxPrice]);
+    }, [searchQuery, productData, selectedCategories, selectedPrice, selectedSize, selectedQuantity]);
 
 
+    const handleChange = (e) => {
+        setSelectedSize(e.target.value);
+    }
+    const handleChange2 = (e) => {
+        const categoryId = e.target.value;
+        setSelectedCategories(prev =>
+            prev.includes(categoryId)
+                ? prev.filter(id => id !== categoryId)
+                : [...prev, categoryId]
+        );
+    };
+    const handleChange3 = (e) => {
+        const quantity = e.target.value;
+        console.log('selected')
+        setSelectedQuantity(quantity)
+        // const [min, max] = quantity === '90-max' ? [90, Infinity] : quantity.split('-');
+        // setSelectedMinQuantity(min);
+        // setSelectedMaxQuantity(max);
+    }
+
+    const rangeSelector = (event, newValue) => {
+        setSelectedPrice(newValue);
+    };
 
     const productlist = async () => {
         try {
@@ -176,7 +223,7 @@ export function ProductList() {
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Name</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Description</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Category</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="center">size</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }} align="center">Size</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Quantity</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Price</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }} align="center">Image</TableCell>
@@ -240,6 +287,8 @@ export function ProductList() {
                         </Button>
                     </Box>
                 </Modal>
+
+
                 <Modal open={openModal2} onClose={() => setOpenModal2(false)}>
                     <Card sx={{
                         position: 'absolute',
@@ -247,51 +296,87 @@ export function ProductList() {
                         left: '80%',
                         transform: 'translate(-50%, -50%)',
                         width: 350,
+                        height: 'auto',
                         bgcolor: 'background.paper',
                         boxShadow: 12,
                         p: 3
                     }}>
-                        <Typography variant="h6" gutterBottom>Filter Products</Typography>
 
-                        {/* Category Dropdown */}
-                        <TextField
-                            select
-                            label="Category"
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            fullWidth
-                            SelectProps={{ native: true }}
-                            sx={{ mb: 2 }}
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>Filter Products</Typography>
+                        <Typography gutterBottom sx={{ fontWeight: 600, fontSize: 15 }}>By Category</Typography>
+                        {categories.map(cat => (
+                            <FormControlLabel
+                                key={cat._id}
+                                label={cat.name}
+                                value={cat._id}
+                                control={
+                                    <Checkbox checked={selectedCategories.includes(cat._id)} onChange={handleChange2} name={cat.name} />
+                                }
+                            />
+                        ))}
+
+                        <Divider />
+
+                        <Typography gutterBottom sx={{ fontWeight: 600, fontSize: 15, mt: 2 }}>By Price</Typography>
+                        <Slider
+                            aria-label="Always visible"
+                            defaultValue={setSelectedPrice}
+                            // getAriaValueText={valuetext}
+                            onChange={rangeSelector}
+                            step={100}
+                            min={100}
+                            max={900000}
+                            valueLabelDisplay="on"
+                            marks={marks}
+                            sx={{ width: '90%' }}
+
+                        />
+                        <Divider />
+
+                        <Typography gutterBottom sx={{ fontWeight: 600, fontSize: 15, mt: 2 }}>By Quantity</Typography>
+                        <FormLabel id="demo-radio-buttons-group-label">Quantity</FormLabel>
+                        <RadioGroup
+                            aria-labelledby="demo-radio-buttons-group-label"
+                            value={ selectedQuantity} 
+                            onChange={handleChange3}
+                            name="radio-buttons-group"
                         >
-                            <option value="">All</option>
-                            {categories.map(cat => (
-                                <option key={cat._id} value={cat._id}>{cat.name}</option>
-                            ))}
-                        </TextField>
+                            <FormControlLabel value="1-30" control={<Radio />} label="1-30" />
+                            <FormControlLabel value="31-60" control={<Radio />} label="31-60" />
+                            <FormControlLabel value="61-90" control={<Radio />} label="61-90" />
+                            <FormControlLabel value="90-max" control={<Radio />} label="90-max" />
+                        </RadioGroup>
 
-                        {/* Price Range */}
-                        <TextField
-                            label="Min Price"
-                            type="number"
-                            value={minPrice}
-                            onChange={(e) => setMinPrice(e.target.value)}
-                            fullWidth
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Max Price"
-                            type="number"
-                            value={maxPrice}
-                            onChange={(e) => setMaxPrice(e.target.value)}
-                            fullWidth
-                        />
+                        <Divider />
+
+                        <Typography gutterBottom sx={{ fontWeight: 600, fontSize: 15, mt: 2 }}>By Size</Typography>
+                        <Select
+                            sx={{ width: 300 }}
+                            label="Size"
+                            labelId="size-select-label"
+                            id="size-simple-select"
+                            value={selectedSize}
+                            onChange={handleChange}
+                        >
+                            {/* <MenuItem value=''><em>All</em></MenuItem> */}
+
+                            {[...Array(100)].map((_, index) => (
+                                <MenuItem key={index + 1} value={index + 1}>{index + 1}</MenuItem>
+                            ))}
+                        </Select>
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={() => setOpenModal2(false)}>
-                            Apply Filters
+                            Apply
+                        </Button>
+                        <Button variant="contained" sx={{ mt: 2, mx: 2 }} onClick={() => {
+                            setSelectedCategories([])
+                            setSelectedPrice('')
+                            setSelectedSize('')
+                        }}>
+                            Reset
                         </Button>
                     </Card>
                 </Modal>
-
             </Box>
         </>
     )
