@@ -29,6 +29,7 @@ export const TextEditor = () => {
     const [isRight, setIsRight] = useState(false);
     const [isCenter, setIsCenter] = useState(false);
     const [isJustify, setIsJustify] = useState(false);
+    const [fontSize, setFontSize] = useState(12);
 
     const handleText = (e) => {
         setText(e.target.value);
@@ -77,6 +78,8 @@ export const TextEditor = () => {
                             defaultValue={12}
                             labelId="font-size-label"
                             id="font-size-select"
+                            value={fontSize}
+                            onChange={(e)=> setFontSize(e.target.value)}
                         >
                             {[...Array(100)].map((_, index) => (
                                 <MenuItem key={index + 1} value={index + 1}>
@@ -123,6 +126,7 @@ export const TextEditor = () => {
                             width: "96.5%",
                             heigth:'500px',
                             padding: 20,
+                            fontSize:`${fontSize}px`,
                             fontWeight: isBold ? "bold" : "normal",
                             fontStyle: isItalic ? "italic" : "normal",
                             textDecoration: isUnderline ? "underline" : "none",
