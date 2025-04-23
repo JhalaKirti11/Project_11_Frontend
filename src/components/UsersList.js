@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -102,9 +101,9 @@ export function UsersList() {
 
     return (
         <>
-            <Box>
-                <div align='center'>Want to see the Products
-                    <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/productlist")}>Click here</Button></div>
+            <Box sx={{ justifyContent: 'center', align:'center' }}>
+                <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/productlist")}>Products</Button>
+                <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/textEditor")}>Text Editor</Button>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
 

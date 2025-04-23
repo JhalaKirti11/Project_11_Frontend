@@ -31,8 +31,6 @@ export function ProductList() {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedPrice, setSelectedPrice] = useState('');
     const [selectedQuantity, setSelectedQuantity] = useState('');
-    // const [selectedMaxQuantity, setSelectedMaxQuantity] = useState('');
-
     const [selectedSize, setSelectedSize] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +39,7 @@ export function ProductList() {
     const [modalMsg, setModalMsg] = useState('');
     const [openModal, setOpenModal] = useState(false);
     const [openModal2, setOpenModal2] = useState(false);
+    
     const marks = [
         {
             value: 100,
@@ -112,16 +111,20 @@ export function ProductList() {
         }
 
         if (selectedSize) {
-            filtered = filtered.filter(product => product.size === selectedSize);
+            console.log("size : " + selectedSize)
+
+            filtered = filtered.filter(product => product.size == selectedSize);
+            console.log("filtered : " + filtered[0]?.size);
         }
 
         setFilteredProducts(filtered);
     }, [searchQuery, productData, selectedCategories, selectedPrice, selectedSize, selectedQuantity]);
 
 
-    const handleChange = (e) => {
-        setSelectedSize(e.target.value);
-    }
+    // const handleChange = (e) => {
+    //     setSelectedSize(e.target.value);
+    // }
+
     const handleChange2 = (e) => {
         const categoryId = e.target.value;
         setSelectedCategories(prev =>
@@ -321,7 +324,6 @@ export function ProductList() {
                         <Slider
                             aria-label="Always visible"
                             defaultValue={setSelectedPrice}
-                            // getAriaValueText={valuetext}
                             onChange={rangeSelector}
                             step={100}
                             min={100}
@@ -337,7 +339,7 @@ export function ProductList() {
                         <FormLabel id="demo-radio-buttons-group-label">Quantity</FormLabel>
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"
-                            value={ selectedQuantity} 
+                            value={selectedQuantity}
                             onChange={handleChange3}
                             name="radio-buttons-group"
                         >
@@ -346,11 +348,13 @@ export function ProductList() {
                             <FormControlLabel value="61-90" control={<Radio />} label="61-90" />
                             <FormControlLabel value="90-max" control={<Radio />} label="90-max" />
                         </RadioGroup>
-
                         <Divider />
 
                         <Typography gutterBottom sx={{ fontWeight: 600, fontSize: 15, mt: 2 }}>By Size</Typography>
-                        <Select
+                        <TextField id="size-simple-select" label="Size" name='size' variant="outlined"
+                            onChange={(e) => setSelectedSize(e.target.value)} sx={{ width: 300 }} />
+
+                        {/* <Select
                             sx={{ width: 300 }}
                             label="Size"
                             labelId="size-select-label"
@@ -358,20 +362,19 @@ export function ProductList() {
                             value={selectedSize}
                             onChange={handleChange}
                         >
-                            {/* <MenuItem value=''><em>All</em></MenuItem> */}
-
                             {[...Array(100)].map((_, index) => (
                                 <MenuItem key={index + 1} value={index + 1}>{index + 1}</MenuItem>
                             ))}
-                        </Select>
+                        </Select> */}
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={() => setOpenModal2(false)}>
                             Apply
                         </Button>
                         <Button variant="contained" sx={{ mt: 2, mx: 2 }} onClick={() => {
-                            setSelectedCategories([])
-                            setSelectedPrice('')
-                            setSelectedSize('')
+                            setSelectedCategories([]);
+                            setSelectedPrice('');
+                            setSelectedQuantity('');
+                            setSelectedSize('');
                         }}>
                             Reset
                         </Button>

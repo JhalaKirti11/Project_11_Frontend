@@ -131,11 +131,11 @@ export function UpdateProduct() {
         try {
             const formData = new FormData();
             formData.append("name", name);
-            formData.append("description", description );
-            formData.append('category', category );
+            formData.append("description", description);
+            formData.append('category', category);
             formData.append('quantity', quantity);
             formData.append("price", price);
-            if(size){
+            if (size) {
                 formData.append("size", size);
             }
             if (image) {
@@ -246,7 +246,7 @@ export function UpdateProduct() {
                                         />
                                     </label>
                                     <input
-                                    required
+                                        required
                                         id='image'
                                         type="file"
                                         accept="image/*"
