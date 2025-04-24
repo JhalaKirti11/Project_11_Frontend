@@ -395,7 +395,7 @@ export const TextEditor = () => {
                     placeholder="Enter Text Here..."
                     style={{
                         width: "96.5%",
-                        height: isFontSize >= 28 ? 'auto' : '500px',
+                        height: isFontSize >= 28 ? 'auto' : '600px',
                         padding: 20,
                         border: '1px solid #c3bdbd',
                         fontSize: `${isFontSize}px`,
