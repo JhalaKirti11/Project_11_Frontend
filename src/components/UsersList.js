@@ -101,7 +101,7 @@ export function UsersList() {
 
     return (
         <>
-            <Box sx={{ justifyContent: 'center', align:'center' }}>
+            <Box sx={{ display:'flex', justifyContent: 'center', alignItems:'center' }}>
                 <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/productlist")}>Products</Button>
                 <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/textEditor")}>Text Editor</Button>
             </Box>
