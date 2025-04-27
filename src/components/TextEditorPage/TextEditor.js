@@ -270,6 +270,7 @@ import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import TextFormatOutlinedIcon from '@mui/icons-material/TextFormatOutlined';
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import FormatSizeOutlinedIcon from '@mui/icons-material/FormatSizeOutlined';
+import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 
 
 export const TextEditor = () => {
@@ -298,6 +299,9 @@ export const TextEditor = () => {
   };
   const changeUnderline = () => {
     document.execCommand('underline', false, null);
+  };
+  const changeStrike = () => {
+    document.execCommand('strikeThrough', false, null);
   };
   const handleColor = (e) => {
     const selectedColor = e.target.value;
@@ -452,6 +456,9 @@ export const TextEditor = () => {
               </IconButton>
               <IconButton onClick={changeUnderline}>
                 <FormatUnderlinedIcon />
+              </IconButton>
+              <IconButton onClick={changeStrike}>
+                <StrikethroughSIcon />
               </IconButton>
             </Box>
           </Toolbar>
