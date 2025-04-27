@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
