@@ -299,11 +299,11 @@ export const TextEditor = () => {
   const changeUnderline = () => {
     document.execCommand('underline', false, null);
   };
-  // const handleColor = (e) => {
-  //   const selectedColor = e.target.value;
-  //   setFontColor(selectedColor);
-  //   document.execCommand('foreColor', false, selectedColor);
-  // };
+  const handleColor = (e) => {
+    const selectedColor = e.target.value;
+    setFontColor(selectedColor);
+    document.execCommand('foreColor', false, selectedColor);
+  };
   
 
 
@@ -336,10 +336,10 @@ export const TextEditor = () => {
     setIsJustify(true);
   }
 
-  const handleColor = (e) => {
-    console.log("color : " + e.target.value)
-    setFontColor(e.target.value);
-  }
+  // const handleColor = (e) => {
+  //   console.log("color : " + e.target.value)
+  //   setFontColor(e.target.value);
+  // }
 
   return (
     <Container maxWidth="lg">
