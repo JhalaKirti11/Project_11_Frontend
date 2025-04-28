@@ -81,7 +81,7 @@ export const Editor = () => {
 
     return (
         <Container maxWidth="lg">
-            <Box sx={{ flexGrow: 1 }}>
+            <Box sx={{ flexGrow: 1, mt:6 }}>
                 <AppBar position="static" sx={{ background: '#dcdfe2' }}>
                     <Toolbar>
                         {/* <IconButton size="large" edge="start" color="inherit" sx={{ mr: 2 }}>
