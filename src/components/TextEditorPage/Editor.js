@@ -29,7 +29,7 @@ import FormatListNumberedOutlinedIcon from '@mui/icons-material/FormatListNumber
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import FormatSizeOutlinedIcon from '@mui/icons-material/FormatSizeOutlined';
 
-export const TextEditor = () => {
+export const Editor = () => {
     const [text, setText] = useState("");
     // const [isBold, setIsBold] = useState(false);
     // const [isUnderline, setIsUnderline] = useState(false);

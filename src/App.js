@@ -13,6 +13,8 @@ import { UpdateProduct } from "./Components/Product/UpdateProduct.js";
 import { AddCategory } from "./Components/Category/AddCategory.js";
 
 import {TextEditor} from './Components/TextEditorPage/TextEditor.js';
+import {Editor} from './Components/TextEditorPage/Editor.js';
+
 import './App.css';
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
         <Route path="/addCategory" element={<AddCategory />} />
 
         <Route path='/textEditor' element={<TextEditor/>}/>
+        <Route path='/tiptapEditor' element={<Editor/>}/>
       </Routes>
     </>
   );
