@@ -173,7 +173,6 @@ export function AddProduct() {
                                         options={categories}
                                         getOptionLabel={(option) => option.name}
                                         value={categories.find((cat) => cat.name === formData.category) || null}
-                                        // onChange={handleChange}
                                         onChange={(event, cat2) => {
                                             handleChange({
                                                 target: {

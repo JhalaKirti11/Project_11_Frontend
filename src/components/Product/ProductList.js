@@ -39,7 +39,7 @@ export function ProductList() {
     const [modalMsg, setModalMsg] = useState('');
     const [openModal, setOpenModal] = useState(false);
     const [openModal2, setOpenModal2] = useState(false);
-    
+
     const marks = [
         {
             value: 100,
@@ -80,13 +80,6 @@ export function ProductList() {
         fetchCategories();
     }, []);
 
-    // useEffect(() => {
-    //     const filtered = productData.filter((product) =>
-    //         product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    //     );
-    //     setFilteredProducts(filtered);
-    // }, [searchQuery, productData]);
-
     useEffect(() => {
         let filtered = productData;
 
@@ -121,10 +114,6 @@ export function ProductList() {
     }, [searchQuery, productData, selectedCategories, selectedPrice, selectedSize, selectedQuantity]);
 
 
-    // const handleChange = (e) => {
-    //     setSelectedSize(e.target.value);
-    // }
-
     const handleChange2 = (e) => {
         const categoryId = e.target.value;
         setSelectedCategories(prev =>
@@ -137,9 +126,6 @@ export function ProductList() {
         const quantity = e.target.value;
         console.log('selected')
         setSelectedQuantity(quantity)
-        // const [min, max] = quantity === '90-max' ? [90, Infinity] : quantity.split('-');
-        // setSelectedMinQuantity(min);
-        // setSelectedMaxQuantity(max);
     }
 
     const rangeSelector = (event, newValue) => {
