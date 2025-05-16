@@ -15,6 +15,8 @@ import { AddCategory } from "./Components/Category/AddCategory.js";
 import {TextEditor} from './Components/TextEditorPage/TextEditor.js';
 import {Editor} from './Components/TextEditorPage/Editor.js';
 
+import {Message} from './Components/Chatting/Message.js';
+
 import './App.css';
 
 function App() {
@@ -36,6 +38,9 @@ function App() {
 
         <Route path='/textEditor' element={<TextEditor/>}/>
         <Route path='/tiptapEditor' element={<Editor/>}/>
+
+        <Route path='/chat' element={<Message/>}/>
+
       </Routes>
     </>
   );

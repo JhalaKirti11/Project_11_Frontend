@@ -104,7 +104,8 @@ export function UsersList() {
             <Box sx={{ display:'flex', justifyContent: 'center', alignItems:'center' }}>
                 <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/productlist")}>Products</Button>
                 <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/textEditor")}>Text Editor</Button>
-                <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/tiptapEditor")}>Tiptap Editor</Button>
+                {/* <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/tiptapEditor")}>Tiptap Editor</Button> */}
+                <Button variant="contained" sx={{ m: 2 }} onClick={() => navigate("/chat")}>Chat</Button>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
 
