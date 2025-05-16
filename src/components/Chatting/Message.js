@@ -53,7 +53,8 @@ export const Message = () => {
 
     const sendMsg = async () => {
         try {
-            console.log("msg sending started...")
+            console.log("msg sending started...");
+            console.log("Receiver's id : " + userChat._id);
             const send = await axios.post(`http://localhost:5000/chat/sendMessage/${id}`, {
                 senderId: id,
                 receiverId: userChat._id,
@@ -74,8 +75,9 @@ export const Message = () => {
     const getChats = async () => {
         try {
             console.log(" viewing chats and Id : " + id)
-            const res = await axios.get(`http://localhost:5000/chat/viewChat/${id}`);
+            const res = await axios.get(`http://localhost:5000/chat/getMsgs/${id}`);
             if (res) {
+                // const jsonMsg = JSON.stringify(res.data.messages);
                 console.log("Your notifications are here : " + res.data.messages);
                 setNotifications(res.data.messages);
             }
@@ -103,7 +105,7 @@ export const Message = () => {
         const userDemo = JSON.stringify(user);
         console.log("User Demo : " + userDemo)
 
-        console.log("Here is the user : " + user.name + " notfications : " + user.notification)
+        console.log("Here is the user : " + user.name + " ,  notfications : " + user.notification)
         setUserChat(user);
         const chat = JSON.stringify(notifications);
         console.log("User's Chat : " + chat);
