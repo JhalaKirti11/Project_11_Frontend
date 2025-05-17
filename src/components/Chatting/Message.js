@@ -27,7 +27,7 @@ export const Message = () => {
 
     useEffect(() => {
         getAllUsers();
-        getChats();
+        // getChats();
         socket.on('receive_message', (data) => {
             // alert(data.message);
             console.log("Data. message : " + data.message)
@@ -42,7 +42,6 @@ export const Message = () => {
 
     useEffect(() => {
         let filtered = usersData;
-
         if (searchQuery) {
             filtered = filtered.filter(user =>
                 user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -102,6 +101,7 @@ export const Message = () => {
         }
     }
     const showChat = (user) => {
+        getChats();
         const userDemo = JSON.stringify(user);
         console.log("User Demo : " + userDemo)
 
