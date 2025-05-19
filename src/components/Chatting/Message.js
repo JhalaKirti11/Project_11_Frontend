@@ -287,7 +287,7 @@ export const Message = () => {
 
     const sendMsg = async () => {
         try {
-            const send = await axios.post(`http://localhost:5000/chat/sendMsg/${id}`, {
+            const send = await axios.post(`http://localhost:5000/chat/sendMessage/${id}`, {
                 receiverId: userChat._id,
                 message: msg
             });
@@ -299,7 +299,7 @@ export const Message = () => {
                 getChats(userChat._id);
             }
         } catch (error) {
-            console.log("Error duringsending message:", error);
+            console.log("Error during sending message:", error);
             console.log("Can not send the Message!");
         }
     }
@@ -307,7 +307,7 @@ export const Message = () => {
     const getChats = async (receiverId) => {
         try {
             console.log("Id : " + id)
-            const res = await axios.get(`http://localhost:5000/chat/viewChat/${id}`);
+            const res = await axios.get(`http://localhost:5000/chat/getMsgs/${id}`);
             if (res) {
                 const filteredNotifications = res.data.messages.filter((notice) => (
                     (notice.senderId === id && notice.receiverId === receiverId) || (notice.receiverId === id && notice.senderId === receiverId)
