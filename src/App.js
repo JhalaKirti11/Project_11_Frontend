@@ -18,6 +18,7 @@ import {Editor} from './Components/TextEditorPage/Editor.js';
 import {Message} from './Components/Chatting/Message.js';
 
 import './App.css';
+import {WordExtraction} from "./Components/Chatting/WordExtraction.js";
 
 function App() {
   return (
@@ -38,7 +39,7 @@ function App() {
 
         <Route path='/textEditor' element={<TextEditor/>}/>
         <Route path='/tiptapEditor' element={<Editor/>}/>
-
+        <Route path='/wordExtract' element={<WordExtraction/>}/>
         <Route path='/chat' element={<Message/>}/>
 
       </Routes>
